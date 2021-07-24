@@ -2,7 +2,9 @@ const path = require('path')
 const fs = require('fs')
 const fse = require('fs-extra')
 const rollup = require('rollup')
-const uglify = require('uglify-es')
+// const terser = require('terser')
+
+import { minify } from "terser";
 const buble = require('@rollup/plugin-buble')
 const json = require('@rollup/plugin-json')
 const { nodeResolve } = require('@rollup/plugin-node-resolve')
@@ -164,15 +166,21 @@ function buildEntry (config) {
         return code
       }
 
-      const minified = uglify.minify(code, {
-        compress: {
-          pure_funcs: ['makeMap']
-        }
-      })
-
-      if (minified.error) {
-        return Promise.reject(minified.error)
+      try {
+        const  minified = await minify(code, {
+          compress: {
+            pure_funcs: ['makeMap']
+          }
+        })
+        // Do something with result
+      } catch (error) {
+        return Promise.reject(error)
+          // Do something with error
       }
+
+      // if (minified.error) {
+      //   return Promise.reject(minified.error)
+      // }
 
       return buildUtils.writeFile(
         config.build.minExt === true
